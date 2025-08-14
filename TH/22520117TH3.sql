@@ -1,0 +1,155 @@
+﻿--1. Bài tập 1
+--Sinh viên hoàn thành Phần III bài tập QuanLyBanHang câu 12 và câu 13.
+--use QuanLyBanHang
+-- CAU 12 Tìm các số hóa đơn đã mua sản phẩm có mã số “BB01” hoặc “BB02”, mỗi sản phẩm mua với số lượng từ 10 đến 20.---
+--SELECT SOHD FROM CTHD
+--WHERE MASP = 'BB01' AND SL >=10 AND SL<=20
+--UNION
+--SELECT SOHD FROM CTHD
+--WHERE MASP ='BB02' AND SL>=10 AND SL<=20
+--CAU 13 Tìm các số hóa đơn mua cùng lúc 2 sản phẩm có mã số “BB01” và “BB02”, mỗi sản phẩm mua với số lượng từ 10 đến 20 
+--SELECT SOHD FROM CTHD
+--WHERE MASP = 'BB01' AND SL >=10 AND SL<=20
+--INTERSECT
+--SELECT SOHD FROM CTHD
+--WHERE MASP ='BB02' AND SL>=10 AND SL<=20
+--Bài tập 4
+--Sinh viên hoàn thành Phần III bài tập QuanLyBanHang từ câu 14 đến 18
+--14.	In ra danh sách các sản phẩm (MASP,TENSP) do “Trung Quoc” sản xuất hoặc các sản phẩm được bán ra trong ngày 1/1/2007.
+--SELECT MASP,TENSP 
+--FROM SANPHAM
+--WHERE NUOCSX = 'Trung Quoc'
+--UNION 
+--SELECT SANPHAM.MASP,TENSP
+--FROM SANPHAM,CTHD,HOADON
+--WHERE NGHD = '1/1/2007' AND SANPHAM.MASP = CTHD.MASP AND CTHD.SOHD = HOADON.SOHD
+--15.	In ra danh sách các sản phẩm (MASP,TENSP) không bán được.
+--SELECT MASP,TENSP FROM SANPHAM 
+--WHERE MASP NOT IN (
+--SELECT MASP FROM CTHD)
+--16.	In ra danh sách các sản phẩm (MASP,TENSP) không bán được trong năm 2006.
+--SELECT MASP, TENSP FROM SANPHAM
+--WHERE MASP NOT IN (SELECT MASP FROM CTHD,HOADON 
+--						WHERE HOADON.SOHD = CTHD.SOHD AND YEAR(NGHD)= 2006)
+--17.	In ra danh sách các sản phẩm (MASP,TENSP) do “Trung Quoc” sản xuất không bán được trong năm 2006
+--SELECT MASP,TENSP FROM SANPHAM
+--WHERE NUOCSX = 'Trung Quoc' and MASP NOT IN 
+--(SELECT MASP FROM CTHD, HOADON WHERE CTHD.SOHD = HOADON.SOHD AND YEAR(NGHD) = 2006)
+--18.	Tìm số hóa đơn trong năm 2006 đã mua ít nhất tất cả các sản phẩm do Singapore sản xuất.
+--SELECT HOADON.SOHD FROM HOADON
+--WHERE YEAR(NGHD)=2006 AND NOT EXISTS (SELECT * FROM SANPHAM 
+--									WHERE NUOCSX = 'Singapore' 
+--					  AND NOT EXISTS (SELECT * FROM CTHD
+--										WHERE CTHD.MASP = SANPHAM.MASP AND	
+--										CTHD.SOHD = HOADON.SOHD))
+--SELECT * FROM CTHD,HOADON,SANPHAM 
+--WHERE CTHD.MASP = CTHD.MASP
+--AND CTHD.SOHD = HOADON.SOHD
+--Bài tập 2
+--Sinh viên hoàn thành Phần II bài tập QuanLyGiaoVu từ câu 1 đến câu 4
+--1.	Tăng hệ số lương thêm 0.2 cho những giáo viên là trưởng khoa.
+--UPDATE GIAOVIEN
+--SET HESO = HESO + 0.2
+--WHERE MAGV IN (SELECT TRGKHOA FROM KHOA )
+--2.	Cập nhật giá trị điểm trung bình tất cả các môn học (DIEMTB) của mỗi học viên (tất cả các môn học đều có hệ số 1 và nếu học viên thi một môn nhiều lần, chỉ lấy điểm của lần thi sau cùng).
+--UPDATE HOCVIEN
+--SET DIEMTB = (SELECT avg(DIEM) FROM KETQUATHI WHERE LANTHI = (
+--	SELECT MAX( LANTHI) FROM KETQUATHI ))
+--3.	Cập nhật giá trị cho cột GHICHU là “Cam thi” đối với trường hợp: học viên có một môn bất kỳ thi lần thứ 3 dưới 5 điểm.
+--UPDATE KETQUATHI 
+--SET HOCVIEN.GHICHU = 'Cam Thi'
+--WHERE  DIEM = (SELECT DIEM FROM KETQUATHI WHERE DIEM <5 AND LANTHI>=3)
+--4.	Cập nhật giá trị cho cột XEPLOAI trong quan hệ HOCVIEN như sau:
+
+--UPDATE HOCVIEN
+--SET XEPLOAI = 'XS'
+--WHERE DIEMTB >=9
+--UPDATE HOCVIEN
+--SET XEPLOAI = 'G'
+--WHERE DIEMTB BETWEEN 8 AND 9
+--UPDATE HOCVIEN
+--SET XEPLOAI = 'K'
+--WHERE DIEMTB BETWEEN 6.5 AND 8
+--UPDATE HOCVIEN
+--SET XEPLOAI = 'TB'
+--WHERE DIEMTB BETWEEN 5 AND 6.5
+--UPDATE HOCVIEN
+--SET XEPLOAI = 'Y'
+--WHERE DIEMTB <5
+--Bài tập 3
+--Sinh viên hoàn thành Phần III bài tập QuanLyGiaoVu từ câu 6 đến câu 10
+--6.	Tìm tên những môn học mà giáo viên có tên “Tran Tam Thanh” dạy trong học kỳ 1 năm 2006.
+--SELECT TENMH FROM MONHOC, GIAOVIEN, GIANGDAY
+--WHERE GIANGDAY.MAMH = MONHOC.MAMH AND GIAOVIEN.MAGV = GIANGDAY.MAGV AND GIAOVIEN.HOTEN = 'Tran Tam Thanh' AND HOCKY = 1 AND NAM = 2006
+--7.	Tìm những môn học (mã môn học, tên môn học) mà giáo viên chủ nhiệm lớp “K11” dạy trong học kỳ 1 năm 2006.
+--SELECT TENMH, MONHOC.MAMH FROM MONHOC, GIAOVIEN, GIANGDAY,lOP
+--WHERE GIANGDAY.MAMH = MONHOC.MAMH AND GIAOVIEN.MAGV = GIANGDAY.MAGV AND GIAOVIEN.MAGV = LOP.MAGVCN AND
+--LOP.MALOP = 'K11' AND HOCKY = 1 AND NAM = 2006
+--8.	Tìm họ tên lớp trưởng của các lớp mà giáo viên có tên “Nguyen To Lan” dạy môn “Co So Du Lieu”.
+--SELECT HOCVIEN.HO, HOCVIEN.TEN FROM HOCVIEN,LOP,GIAOVIEN,MONHOC,GIANGDAY
+--WHERE LOP.TRGLOP = HOCVIEN.MAHV AND GIANGDAY.MAMH = MONHOC.MAMH AND GIAOVIEN.MAGV = GIANGDAY.MAGV AND GIANGDAY.MALOP = LOP.MALOP
+--AND (GIAOVIEN.HOTEN = 'Nguyen To Lan' AND TENMH = 'Co So Du Lieu')
+--9.	In ra danh sách những môn học (mã môn học, tên môn học) phải học liền trước môn “Co So Du Lieu”.
+--SELECT MAMH_TRUOC,TENMH FROM DIEUKIEN,MONHOC
+--WHERE  DIEUKIEN.MAMH = 'CSDL' AND DIEUKIEN.MAMH_TRUOC = MONHOC.MAMH
+--10.	Môn “Cau Truc Roi Rac” là môn bắt buộc phải học liền trước những môn học (mã môn học, tên môn học) nào
+--SELECT DIEUKIEN.MAMH , TENMH FROM DIEUKIEN, MONHOC
+--WHERE MAMH_TRUOC = 'CTRR' AND MONHOC.MAMH = DIEUKIEN.MAMH
+--11.	Tìm họ tên giáo viên dạy môn CTRR cho cả hai lớp “K11” và “K12” trong cùng học kỳ 1 năm 2006.
+--SELECT GIAOVIEN.HOTEN FROM GIAOVIEN,GIANGDAY
+--WHERE MALOP = 'K11'AND  HOCKY = 1 AND NAM = 2006 AND GIAOVIEN.MAGV = GIANGDAY.MAGV 
+--INTERSECT
+--SELECT GIAOVIEN.HOTEN FROM GIAOVIEN,GIANGDAY
+--WHERE MALOP = 'K12' AND HOCKY = 1 AND NAM = 2006 AND GIAOVIEN.MAGV = GIANGDAY.MAGV 
+--12.	Tìm những học viên (mã học viên, họ tên) thi không đạt môn CSDL ở lần thi thứ 1 nhưng chưa thi lại môn này.
+--SELECT HOCVIEN.MAHV , HO,TEN FROM HOCVIEN, KETQUATHI
+--WHERE HOCVIEN.MAHV = KETQUATHI.MAHV AND (MAMH = 'CSDL' AND KQUA = 'Khong Dat' and LANTHI = 1 )
+--EXCEPT
+--SELECT HOCVIEN.MAHV , HO,TEN FROM HOCVIEN, KETQUATHI
+--WHERE HOCVIEN.MAHV = KETQUATHI.MAHV AND LANTHI > 1
+--13.	Tìm giáo viên (mã giáo viên, họ tên) không được phân công giảng dạy bất kỳ môn học nào.
+--SELECT GIAOVIEN.MAGV,HOTEN FROM GIAOVIEN
+--EXCEPT
+--SELECT GIAOVIEN.MAGV,HOTEN FROM GIAOVIEN, GIANGDAY
+--WHERE GIAOVIEN.MAGV = GIANGDAY.MAGV
+--14.	Tìm giáo viên (mã giáo viên, họ tên) không được phân công giảng dạy bất kỳ môn học nào thuộc khoa giáo viên đó phụ trách.
+--SELECT GIAOVIEN.MAGV,HOTEN FROM GIAOVIEN
+--EXCEPT
+--SELECT GIAOVIEN.MAGV,HOTEN FROM GIAOVIEN, MONHOC
+--WHERE  MONHOC.MAKHOA = GIAOVIEN.MAKHOA
+--15.	Tìm họ tên các học viên thuộc lớp “K11” thi một môn bất kỳ quá 3 lần vẫn “Khong dat” hoặc thi lần thứ 2 môn CTRR được 5 điểm.
+--SELECT HO,TEN FROM HOCVIEN, LOP, KETQUATHI
+--WHERE HOCVIEN.MAHV = KETQUATHI.MAHV AND HOCVIEN.MALOP = LOP.MALOP AND KQUA = 'Khong Dat' AND LANTHI >=3
+--UNION
+--SELECT  HO,TEN FROM HOCVIEN, LOP, KETQUATHI
+--WHERE HOCVIEN.MAHV = KETQUATHI.MAHV AND HOCVIEN.MALOP = LOP.MALOP AND MAMH = 'CTRR'AND DIEM = 5 AND LANTHI = 2
+--16.	Tìm họ tên giáo viên dạy môn CTRR cho ít nhất hai lớp trong cùng một học kỳ của một năm học.
+--SELECT GIAOVIEN.HOTEN ,COUNT(MALOP) AS SOLOP  FROM GIAOVIEN , GIANGDAY 
+--WHERE GIAOVIEN.MAGV = GIANGDAY.MAGV AND MAMH = 'CTRR'  
+--GROUP BY  GIAOVIEN.HOTEN
+--HAVING COUNT(MALOP) >=2 
+--17.	Danh sách học viên và điểm thi môn CSDL (chỉ lấy điểm của lần thi sau cùng).
+--SELECT HOCVIEN.* ,DIEM  FROM HOCVIEN,KETQUATHI 
+--WHERE HOCVIEN.MAHV = KETQUATHI.MAHV 
+--AND MAMH = 'CSDL'
+--AND LANTHI = 
+--(SELECT MAX(LANTHI)
+--FROM KETQUATHI
+--WHERE MAMH = 'CSDL' AND KETQUATHI.MAHV = HOCVIEN.MAHV 
+--GROUP BY MAHV)
+--18.	Danh sách học viên và điểm thi môn “Co So Du Lieu” (chỉ lấy điểm cao nhất của các lần thi).
+--SELECT HOCVIEN.* ,DIEM 
+--FROM HOCVIEN,KETQUATHI , MONHOC
+--WHERE HOCVIEN.MAHV = KETQUATHI.MAHV
+--AND KETQUATHI.MAMH = MONHOC.MAMH
+--AND DIEM = 
+--( SELECT MAX(DIEM)
+--FROM KETQUATHI,MONHOC
+--WHERE KETQUATHI.MAMH = MONHOC.MAMH
+--AND KETQUATHI.MAHV = HOCVIEN.MAHV
+--AND TENMH = 'Co So Du Lieu'
+--GROUP BY MAHV)
+
+
+
+

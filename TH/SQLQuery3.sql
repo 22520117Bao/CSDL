@@ -1,0 +1,3 @@
+---TAO BANG---
+ALTER TABLE SANPHAM
+ADD GHICHU varchar(20)

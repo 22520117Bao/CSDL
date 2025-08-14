@@ -1,0 +1,332 @@
+﻿-- Quan ly ban hang
+--19.	Có bao nhiêu hóa đơn không phải của khách hàng đăng ký thành viên mua?
+--select count(SOHD) AS SLHD
+--FROM HOADON
+--WHERE MAKH IS NULL
+--C2 
+--SELECT COUNT(*)
+--FROM HOADON 
+--WHERE NOT EXISTS ( SELECT MAKH
+--FROM KHACHHANG 
+--WHERE KHACHHANG.MAKH = HOADON.MAKH)
+--20.	Có bao nhiêu sản phẩm khác nhau được bán ra trong năm 2006.
+--SELECT COUNT(DISTINCT MASP) AS SLSP
+--FROM CTHD RIGHT JOIN  HOADON ON CTHD.SOHD = HOADON.SOHD
+--WHERE YEAR(NGHD) = 2006 
+--21.	Trị giá trung bình của tất cả các hóa đơn được bán ra trong năm 2006 là bao nhiêu?
+--SELECT AVG(TRIGIA) AS TGTB
+--FROM HOADON 
+--WHERE YEAR(NGHD) = 2006
+--22.	Tính doanh thu bán hàng trong năm 2006.
+--SELECT SUM(TRIGIA)
+--FROM HOADON
+--WHERE YEAR(NGHD) = 2006
+--23.	Tìm số hóa đơn có trị giá cao nhất trong năm 2006.
+--SELECT SOHD
+--FROM HOADON
+--WHERE TRIGIA IN ( SELECT MAX(TRIGIA) 
+--FROM HOADON
+--WHERE YEAR(NGHD) =2006)
+--24.	Tìm họ tên khách hàng đã mua hóa đơn có trị giá cao nhất trong năm 2006
+--SELECT HOTEN 
+--FROM KHACHHANG, HOADON 
+--WHERE KHACHHANG.MAKH = HOADON.MAKH AND HOADON.TRIGIA IN (SELECT MAX(TRIGIA) 
+--FROM HOADON
+--WHERE YEAR(NGHD) =2006)
+--25.	In ra danh sách 3 khách hàng (MAKH, HOTEN) có doanh số cao nhất.
+--SELECT TOP 3 MAKH,HOTEN 
+--FROM KHACHHANG 
+--ORDER BY DOANHSO DESC
+--26.	In ra danh sách các sản phẩm (MASP, TENSP) có giá bán bằng 1 trong 3 mức giá cao nhất.
+--SELECT MASP, TENSP
+--FROM SANPHAM 
+--WHERE GIA IN ( SELECT TOP 3 GIA
+--FROM SANPHAM
+--ORDER BY GIA DESC)
+--27.	In ra danh sách các sản phẩm (MASP, TENSP) do “Thai Lan” sản xuất có giá bằng 1 trong 3 mức giá cao nhất (của tất cả các sản phẩm).
+--SELECT MASP, TENSP 
+--FROM SANPHAM
+--WHERE NUOCSX = 'Thai Lan' and GIA IN ( SELECT TOP 3 GIA
+--FROM SANPHAM
+--ORDER BY GIA DESC)
+--28.	In ra danh sách các sản phẩm (MASP, TENSP) do “Trung Quoc” sản xuất có giá bằng 1 trong 3 mức giá cao nhất (của sản phẩm do “Trung Quoc” sản xuất)
+--SELECT MASP, TENSP
+--FROM SANPHAM
+--WHERE NUOCSX = 'Trung Quoc' and GIA IN ( SELECT TOP 3 GIA
+--FROM SANPHAM
+--WHERE NUOCSX = 'Trung Quoc'
+--ORDER BY GIA DESC)
+--29.	* In ra danh sách 3 khách hàng có doanh số cao nhất (sắp xếp theo kiểu xếp hạng).
+--SELECT TOP 3 RANK() OVER (ORDER BY kh.DOANHSO DESC) ThuHang, *
+--FROM KHACHHANG kh
+--ORDER BY kh.DOANHSO DESC
+--C2
+--SELECT Thuhang,* 
+--FROM KHACHHANG, (SELECT MAKH, HOTEN , RANK () OVER (ORDER BY DOANHSO DESC) AS Thuhang 
+--				FROM KHACHHANG ) AS SUB_RANK
+--WHERE KHACHHANG.MAKH = SUB_RANK.MAKH AND Thuhang <=3
+--30.	Tính tổng số sản phẩm do “Trung Quoc” sản xuất.
+--SELECT COUNT(MASP) AS TSP
+--FROM SANPHAM 
+--WHERE NUOCSX = 'Trung Quoc'
+--31.	Tính tổng số sản phẩm của từng nước sản xuất.
+--SELECT NUOCSX, COUNT(MASP) AS TSPC
+--FROM SANPHAM 
+--GROUP BY NUOCSX
+--32.	Với từng nước sản xuất, tìm giá bán cao nhất, thấp nhất, trung bình của các sản phẩm.
+--SELECT NUOCSX,MAX(GIA) AS GIACAONHAT, MIN(GIA) AS GIANHONHAT, AVG(GIA) AS GIATB
+--FROM SANPHAM 
+--GROUP BY NUOCSX 
+--33.	Tính doanh thu bán hàng mỗi ngày.
+--SELECT NGHD, SUM(TRIGIA) AS DOANHTHU
+--FROM HOADON 
+--GROUP BY NGHD
+--34.	Tính tổng số lượng của từng sản phẩm bán ra trong tháng 10/2006.
+--SELECT MASP,SUM(SL) AS TONGSL 
+--FROM CTHD , HOADON
+--WHERE CTHD.SOHD =HOADON.SOHD AND YEAR(NGHD) = 2006 AND MONTH(NGHD)= 10
+--GROUP BY MASP 
+--35.	Tính doanh thu bán hàng của từng tháng trong năm 2006
+--SELECT MONTH(NGHD),SUM(TRIGIA) AS DOANHTHU 
+--FROM HOADON 
+--WHERE YEAR(NGHD) = 2006
+--GROUP BY MONTH(NGHD) 
+--36.	Tìm hóa đơn có mua ít nhất 4 sản phẩm khác nhau.
+--SELECT SOHD
+--FROM CTHD 
+--GROUP BY SOHD 
+--HAVING COUNT (DISTINCT MASP) >=4
+--37.	Tìm hóa đơn có mua 3 sản phẩm do “Viet Nam” sản xuất (3 sản phẩm khác nhau).
+--SELECT HOADON.SOHD
+--FROM HOADON, SANPHAM, CTHD 
+--WHERE HOADON.SOHD = CTHD.SOHD AND CTHD.MASP = SANPHAM.MASP AND NUOCSX = 'Viet Nam' 
+--GROUP BY HOADON.SOHD
+--HAVING COUNT (DISTINCT CTHD.MASP) = 3
+
+--38.	Cho biết trị giá hóa đơn cao nhất, thấp nhất là bao nhiêu?
+--SELECT MAX(TRIGIA) TGM , MIN(TRIGIA) TGm
+--FROM HOADON 
+--39.	Tìm khách hàng (MAKH, HOTEN) có số lần mua hàng nhiều nhất. 
+--SELECT TOP 1 HOADON.MAKH, KH.HOTEN
+--FROM HOADON, KHACHHANG KH 
+--WHERE HOADON.MAKH is not null and HOADON.MAKH = KH.MAKH
+--GROUP BY HOADON.MAKH, KH.HOTEN
+--ORDER BY count(HOADON.MAKH) DESC
+--40.	Tháng mấy trong năm 2006, doanh số bán hàng cao nhất ?
+--SELECT MONTH(HD1.NGHD) AS BESTMONTH
+--FROM HOADON HD1
+--WHERE YEAR(HD1.NGHD) =2006 
+--GROUP BY MONTH(HD1.NGHD) 
+--HAVING SUM(HD1.TRIGIA) >= ALL ( SELECT SUM(HD2.TRIGIA) 
+--FROM HOADON HD2 
+--WHERE YEAR(HD2.NGHD) =2006 
+--GROUP BY MONTH(HD2.NGHD) )
+--41.	Tìm sản phẩm (MASP, TENSP) có tổng số lượng bán ra thấp nhất trong năm 2006.
+--SELECT TOP 1 WITH TIES SANPHAM.MASP , TENSP, SUM(SL) AS SLBANMIN
+--FROM CTHD , SANPHAM, HOADON
+--WHERE CTHD.SOHD = HOADON.SOHD AND SANPHAM.MASP = CTHD.MASP
+--AND YEAR(NGHD) = 2006
+--GROUP BY SANPHAM.MASP, TENSP
+--ORDER BY SUM(SL) ASC
+-- 42.	*Mỗi nước sản xuất, tìm sản phẩm (MASP,TENSP) có giá bán cao nhất
+--SELECT NUOCSX, MASP, TENSP, GIA 
+--FROM SANPHAM SP1
+--WHERE SP1.GIA IN (
+--					SELECT MAX(GIA)
+--					FROM SANPHAM SP2
+--					GROUP BY NUOCSX 
+--					HAVING SP1.NUOCSX = SP2.NUOCSX)
+--43.	Tìm nước sản xuất sản xuất ít nhất 3 sản phẩm có giá bán khác nhau.
+--SELECT NUOCSX FROM SANPHAM
+--GROUP BY NUOCSX 
+--HAVING COUNT(DISTINCT GIA) >=3 
+--44.	*Trong 10 khách hàng có doanh số cao nhất, tìm khách hàng có số lần mua hàng nhiều nhất.
+--SELECT * 
+--FROM KHACHHANG 
+--WHERE MAKH IN (
+--				SELECT TOP 1 WITH TIES HOADON.MAKH
+--				FROM HOADON 
+--				WHERE HOADON.MAKH IN ( SELECT TOP 10 WITH TIES MAKH
+--									   FROM KHACHHANG 
+--									   ORDER BY DOANHSO DESC )
+--				GROUP BY HOADON.MAKH
+--				ORDER BY COUNT(*) DESC 
+--				)
+ --Quan ly giao vu
+ --19.	Khoa nào (mã khoa, tên khoa) được thành lập sớm nhất.
+ --SELECT MAKHOA, TENKHOA
+ --FROM KHOA
+ --WHERE NGTLAP <= ALL (SELECT NGTLAP
+	--				  FROM KHOA)
+-- 20.	Có bao nhiêu giáo viên có học hàm là “GS” hoặc “PGS”.
+--SELECT COUNT (MAGV) AS SOGV
+--FROM GIAOVIEN 
+--WHERE HOCHAM = 'GS' OR HOCHAM = 'PGS'
+--21.	Thống kê có bao nhiêu giáo viên có học vị là “CN”, “KS”, “Ths”, “TS”, “PTS” trong mỗi khoa.
+--SELECT COUNT (MAGV) 
+--FROM GIAOVIEN 
+--WHERE HOCVI = 'CN'OR HOCVI ='KS'OR HOCVI ='Ths'OR HOCVI ='TS'OR HOCVI ='PTS'
+--GROUP BY MAKHOA
+--22.	Mỗi môn học thống kê số lượng học viên theo kết quả (đạt và không đạt).
+--SELECT MAMH, KQUA, COUNT(*) AS SOHV
+--FROM KETQUATHI
+--GROUP BY MAMH, KQUA
+--ORDER BY MAMH
+
+--23.	Tìm giáo viên (mã giáo viên, họ tên) là giáo viên chủ nhiệm của một lớp, đồng thời dạy cho lớp đó ít nhất một môn học.
+--SELECT GIAOVIEN.MAGV, GIAOVIEN.HOTEN 
+--FROM GIAOVIEN, LOP ,GIANGDAY
+--WHERE GIAOVIEN.MAGV = LOP.MAGVCN AND LOP.MALOP = GIANGDAY.MALOP
+--GROUP BY GIAOVIEN.MAGV,GIAOVIEN.HOTEN
+--HAVING COUNT(MAMH)>=1
+
+--24.	Tìm họ tên lớp trưởng của lớp có sỉ số cao nhất.
+--SELECT  HOCVIEN.HO,HOCVIEN.TEN
+--FROM LOP, HOCVIEN
+--WHERE HOCVIEN.MAHV= LOP.TRGLOP AND SISO =  (SELECT MAX(SISO) 
+--												FROM LOP)
+												
+--25.	* Tìm họ tên những LOPTRG thi không đạt quá 3 môn (mỗi môn đều thi không đạt ở tất cả các lần thi).
+--SELECT HO+' '+TEN AS HOTEN
+--FROM HOCVIEN, LOP
+--WHERE HOCVIEN.MAHV = LOP.TRGLOP AND 
+--MAHV IN ( SELECT MAHV FROM (
+--							SELECT K1.MAHV,K1.MAMH, COUNT(DISTINCT K1.LANTHI)  FROM KETQUATHI K1
+--							WHERE K1.KQUA = 'Khong Dat'
+--							GROUP BY K1.MAHV , K1.MAMH
+--							HAVING COUNT(DISTINCT K1.LANTHI) = ( SELECT COUNT(K2.LANTHI) FROM KETQUATHI K2
+--																GROUP BY K2.MAHV , K2.MAMH
+--																HAVING K1.MAMH = K2.MAMH AND K1.MAHV = K2.MAHV))
+--		  GROUP BY MAHV
+--		  HAVING COUNT(MAMH) >=3
+--		)
+--26.	Tìm học viên (mã học viên, họ tên) có số môn đạt điểm 9, 10 nhiều nhất.
+--SELECT HOCVIEN.MAHV, HO+' '+TEN AS HOTEN
+--FROM HOCVIEN,KETQUATHI 
+--WHERE HOCVIEN.MAHV = KETQUATHI.MAHV
+--AND DIEM>=9
+--GROUP BY HOCVIEN.MAHV,HO, TEN
+--HAVING COUNT(*) >= ALL (SELECT COUNT(*) FROM KETQUATHI WHERE DIEM>=9 GROUP BY MAHV)
+--27.	Trong từng lớp, tìm học viên (mã học viên, họ tên) có số môn đạt điểm 9, 10 nhiều nhất.
+--SELECT MALOP, HO ,TEN 
+--FROM(
+--SELECT MALOP, HO, TEN , COUNT(*) AS SL_DIEM,
+--		RANK() OVER (PARTITION BY MALOP ORDER BY COUNT(*) DESC) AS RANK_NO
+--FROM HOCVIEN HV JOIN KETQUATHI KQT ON HV.MAHV = KQT.MAHV
+--WHERE DIEM >=9
+--GROUP BY MALOP,HO, TEN) AS A
+--WHERE RANK_NO = 1
+
+--28.	Trong từng học kỳ của từng năm, mỗi giáo viên phân công dạy bao nhiêu môn học, bao nhiêu lớp.
+--SELECT  COUNT(DISTINCT MALOP) AS SOLOP, COUNT(DISTINCT MAMH) AS SOMH
+--FROM GIANGDAY 
+--GROUP BY MAGV
+
+--29.	Trong từng học kỳ của từng năm, tìm giáo viên (mã giáo viên, họ tên) giảng dạy nhiều nhất.
+--SELECT HOCKY, NAM, A.MAGV, HOTEN
+--FROM GIAOVIEN,
+--(
+--	SELECT 
+--		HOCKY, NAM, MAGV, RANK() OVER (PARTITION BY HOCKY, NAM ORDER BY COUNT(*) DESC) AS RANK_NO
+--	FROM GIANGDAY
+--	GROUP BY HOCKY, NAM, MAGV
+--) AS A
+--WHERE
+--	A.MAGV = GiaoVien.MAGV
+--	AND RANK_NO = 1
+--ORDER BY
+--	NAM, HOCKY
+--30.	Tìm môn học (mã môn học, tên môn học) có nhiều học viên thi không đạt (ở lần thi thứ 1) nhất.
+--SELECT TOP 1 WITH TIES
+--	MONHOC.MAMH, TENMH
+--FROM
+--	MONHOC, KETQUATHI
+--WHERE
+--	MONHOC.MAMH = KETQUATHI.MAMH
+--	AND LANTHI = 1
+--	AND KQUA = 'Khong Dat'
+--GROUP BY
+--	MONHOC.MAMH, TENMH
+--ORDER BY
+--	COUNT(*) DESC
+--31.	Tìm học viên (mã học viên, họ tên) thi môn nào cũng đạt (chỉ xét lần thi thứ 1).
+--SELECT DISTINCT HOCVIEN.MAHV, (Ho+' '+Ten) AS HOTEN
+--FROM
+--	HOCVIEN, KETQUATHI
+--WHERE
+--	HOCVIEN.MAHV = KETQUATHI.MAHV
+--	AND NOT EXISTS
+--	(
+--		SELECT *
+--		FROM KETQUATHI
+--		WHERE LANTHI = 1
+--		AND KQUA = 'Khong Dat'
+--		AND MAHV = HOCVIEN.MAHV
+--	)
+--32.	* Tìm học viên (mã học viên, họ tên) thi môn nào cũng đạt (chỉ xét lần thi sau cùng).
+--SELECT DISTINCT HOCVIEN.MAHV, (HO+' '+TEN) HOTEN 
+--FROM HOCVIEN, KETQUATHI
+--WHERE HOCVIEN.MAHV = KETQUATHI.MAHV 
+--AND NOT EXISTS(SELECT * FROM KETQUATHI   
+--WHERE LANTHI = (SELECT MAX(LANTHI) 
+--FROM KETQUATHI 
+--WHERE MAHV = HOCVIEN.MAHV 
+--GROUP BY MAHV)  AND KQUA = 'KHONG DAT'  AND MAHV = HOCVIEN.MAHV)
+
+
+--33.	* Tìm học viên (mã học viên, họ tên) đã thi tất cả các môn và đều đạt (chỉ xét lần thi thứ 1).
+--SELECT MAHV, HO, TEN 
+--FROM HOCVIEN
+--WHERE NOT EXISTS
+--(
+--	SELECT *
+--	FROM MONHOC
+--	WHERE NOT EXISTS
+--	(
+--		SELECT *
+--		FROM KETQUATHI
+--		WHERE
+--			KETQUATHI.MAMH = MONHOC.MAMH
+--			AND KETQUATHI.MAHV = HOCVIEN.MAHV
+--			AND LANTHI = 1 AND KQUA = 'Dat'
+--	)
+--)
+
+--34.	* Tìm học viên (mã học viên, họ tên) đã thi tất cả các môn và đều đạt (chỉ xét lần thi sau cùng).
+--SELECT MAHV, HO, TEN 
+--FROM HOCVIEN
+--WHERE NOT EXISTS
+--(
+--	SELECT *
+--	FROM MONHOC
+--	WHERE NOT EXISTS
+--	(
+--		SELECT *
+--		FROM KETQUATHI
+--		WHERE
+--			KETQUATHI.MAMH = MONHOC.MAMH
+--			AND KETQUATHI.MAHV = HOCVIEN.MAHV
+--			AND LANTHI = (SELECT MAX(LANTHI) FROM KETQUATHI WHERE MAHV = HOCVIEN.MAHV GROUP BY MAHV)
+--			AND KQUA = 'Dat'
+--)
+--)
+--35.	** Tìm học viên (mã học viên, họ tên) có điểm thi cao nhất trong từng môn (lấy điểm ở lần thi sau cùng).
+--SELECT MAMH, MAHV, HOTEN
+--FROM
+--(
+--	SELECT
+--		MAMH, HOCVIEN.MAHV, (HO+' '+TEN) HOTEN, RANK() OVER (PARTITION BY MAMH ORDER BY MAX(DIEM) DESC) AS XEPHANG
+--	FROM
+--		HOCVIEN, KETQUATHI
+--	WHERE
+--		HOCVIEN.MAHV = KETQUATHI.MAHV
+--		AND LANTHI = (SELECT MAX(LANTHI) FROM KETQUATHI WHERE MAHV = HOCVIEN.MAHV GROUP BY MAHV)
+--	GROUP BY
+--		MAMH, HOCVIEN.MAHV, HO, TEN
+--) AS A
+--WHERE XepHang = 1
+
+
+
+
+					  
